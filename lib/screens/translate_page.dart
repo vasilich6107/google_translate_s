@@ -1,8 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:google_translate_s/components/card_favorite.dart';
 import 'package:google_translate_s/components/translate_widget.dart';
+import 'package:google_translate_s/components/translation_widget.dart';
+import 'package:google_translate_s/models/translation_entity.dart';
 import 'package:google_translate_s/models/translation_request.dart';
 
+import '../models/translations/translation.dart';
 import '../models/translations/translation_response.dart';
 
 class TranslatePage extends StatefulWidget {
@@ -43,6 +47,58 @@ class _TranslatePageState extends State<TranslatePage> {
           'Translations',
           style: TextStyle(color: Colors.grey, fontSize: 12),
         ),
+        FutureBuilder<TranslationResponse>(
+          future: this.translate != null && this.translate.text != null
+              ? getTranslation(this.translate)
+              : null,
+          builder: (BuildContext context,
+              AsyncSnapshot<TranslationResponse> snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+                return Container();
+              case ConnectionState.active:
+              case ConnectionState.waiting:
+                return Container();
+              case ConnectionState.done:
+                if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+
+                return Column(
+                  children: snapshot.data.translations.map((Translation value) {
+                    final translation = TranslationEntity(
+                        source: this.translate.text,
+                        translation: value.translatedText,
+                        from: this.translate.from,
+                        to: this.translate.to,
+                        detected: value.detectedSourceLanguage);
+
+                    List detected = [];
+                    if (value.detectedSourceLanguage != null) {
+                      detected.add(SizedBox(height: 5));
+                      detected.add(Text(
+                        'Detected language: ${value.detectedSourceLanguage}',
+                        style: TextStyle(color: Colors.grey, fontSize: 10),
+                      ));
+                    }
+
+                    return CardFavorite(
+                      translation: translation,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          TranslationWidget(
+                            translation: translation,
+                          ),
+                          ...detected,
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+            }
+
+            return Container();
+          },
+        )
       ],
     );
   }
