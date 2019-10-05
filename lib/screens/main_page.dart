@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_translate_s/screens/favorite_page.dart';
+import 'package:google_translate_s/screens/translate_page.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -8,8 +10,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   final List<Widget> _children = [
-    Container(),
-    Container(),
+    TranslatePage(),
+    FavoritePage(),
   ];
 
   void onTabTapped(int index) {
