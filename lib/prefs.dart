@@ -1,20 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:crypted_preferences/crypted_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'models/translation_pref.dart';
 
 class Pref {
-  static const String _path = './prefs';
   static Completer<Preferences> _completer;
 
   static Future<Preferences> getInstance() async {
     if (_completer == null) {
       _completer = Completer<Preferences>();
       try {
-        final test = await Preferences.preferences(path: _path);
-        _completer.complete(test);
+        var path = '';
+
+        try {
+          if (Platform.isIOS || Platform.isAndroid) {
+            final directory = await getApplicationDocumentsDirectory();
+            path = directory.path;
+          }
+        } catch (e) {}
+
+        _completer
+            .complete(await Preferences.preferences(path: '$path/prefs.txt'));
       } on Exception catch (e) {
         _completer.completeError(e);
         final Future<Preferences> prefFuture = _completer.future;

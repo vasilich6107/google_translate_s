@@ -11,8 +11,9 @@ class TranslationPref with WithPreferencesSerializable {
   }
 
   remove(TranslationEntity translationEntity) {
-    this.translationList.removeWhere(
-        (item) => item.translation == translationEntity.translation);
+    this.translationList.removeWhere((item) =>
+        item.translation == translationEntity.translation &&
+        item.source == translationEntity.source);
   }
 
   static TranslationPref fromMap(Map<String, dynamic> data) {
