@@ -1,8 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:google_translate_s/components/card_empty.dart';
+import 'package:google_translate_s/components/card_error.dart';
+import 'package:google_translate_s/components/card_favorite.dart';
+import 'package:google_translate_s/components/translation_widget.dart';
+import 'package:google_translate_s/models/translation_pref.dart';
+import 'package:google_translate_s/prefs.dart';
 
 class FavoritePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return FutureBuilder<TranslationPref>(
+      future: translationPrefRead(),
+      builder: (BuildContext context, AsyncSnapshot<TranslationPref> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return CardEmpty();
+          case ConnectionState.active:
+          case ConnectionState.waiting:
+            return Container();
+          case ConnectionState.done:
+            if (snapshot.hasError) {
+              return CardError();
+            }
+
+            if (snapshot.data != null) {
+              if (snapshot.data.translationList.length == 0) {
+                return CardEmpty();
+              }
+
+              return ListView.builder(
+                itemCount: snapshot.data.translationList.length,
+                itemBuilder: (context, index) {
+                  return CardFavorite(
+                    translation: snapshot.data.translationList[index],
+                    child: TranslationWidget(
+                        translation: snapshot.data.translationList[index]),
+                    saved: true,
+                  );
+                },
+              );
+            }
+        }
+
+        return Container();
+      },
+    );
   }
 }
